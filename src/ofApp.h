@@ -1,6 +1,11 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxImGui.h"
+#include "ofxAppHelper.h"
+#include "ofxMotion.h"
+#include "SoundTrack.h"
+#include "SoundPlayer.h"
 
 class ofApp : public ofBaseApp{
 
@@ -8,17 +13,15 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-
-		void keyPressed(int key);
+		void drawImGui();
 		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void mouseEntered(int x, int y);
-		void mouseExited(int x, int y);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
-		
+
+		float now;
+		float step;
+
+		ofxImGui::Gui gui;
+		vec2 center;
+		SoundTrack soundTrack;
+		static const int soundPlayerMaxSize = 3;
+		SoundPlayer soundPlayer[soundPlayerMaxSize];
 };

@@ -1,71 +1,81 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
+	ofSetFrameRate(60);
+	ofSetVerticalSync(true);
+	gui.setup();
+	ofColor colorBackground = ofColor(200, 200, 200);
+	ofBackground(colorBackground);
+	step = 1.0f / 60;
 
+	center = vec2(ofGetWidth() * 0.5, ofGetHeight() * 0.5);
+	soundTrack.setup(center, vec2(ofGetWidth(), 200), colorBackground, ofColor(50, 50, 50));
+
+	ofColor color[3];
+	color[0] = ofColor(0, 170, 0);
+	color[1] = ofColor(0, 0, 255, 100);
+	color[2] = ofColor(120, 60, 60);
+
+	for (int i = 0; i < soundPlayerMaxSize; i++) {
+		soundPlayer[i].setupPlayer(soundTrack.posInit, soundTrack.radius, soundTrack.radians, soundTrack.maxSize, soundTrack.panMap, color[i]);
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-
+	now += step;
+	for (int i = 0; i < soundPlayerMaxSize; i++) {
+		soundPlayer[i].update(now);
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-
+	soundTrack.draw();
+	for (int i = 0; i < soundPlayerMaxSize; i++) {
+		soundPlayer[i].draw();
+	}
+	drawImGui();
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-
+void ofApp::drawImGui() {
+	gui.begin();
+	{
+		for (int i = 0; i < soundPlayerMaxSize; i++) {
+			ImGui::GetStyle().WindowRounding = 0;
+			ImGui::SetNextWindowPos(ImVec2(0 + (i * 300), 0));
+			ImGui::SetNextWindowSize(ImVec2(300, 200));
+			string name = ofToString(i);
+			bool panelOpen = true;
+			ImGui::Begin(name.c_str(), &panelOpen, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+			if (ImGui::Button(soundPlayer[i].stringButtonName.c_str(), vec2(300, 24))) {
+				soundPlayer[i].start();
+			}
+			ImGui::Separator();
+			ImGui::Combo("Tempo", &soundPlayer[i].playTempoIndex, soundPlayer[i].cTempoList, IM_ARRAYSIZE(soundPlayer[i].cTempoList));
+			ImGui::Separator();
+			ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
+			ImGui::Separator();
+			ImGui::SliderInt("Range", &soundPlayer[i].range, 0, soundPlayer[i].soundFilesMaxSize);
+			ImGui::Separator();
+			ImGui::SliderInt("Position", &soundPlayer[i].rangePos, 0, soundPlayer[i].soundFilesMaxSize);
+			ImGui::Separator();
+			ImGui::SliderFloat("Pitch", &soundPlayer[i].pitch, 0.5, 2.5);
+			ImGui::Separator();
+			ImGui::SliderFloat("Volume", &soundPlayer[i].volume, 0.0, 2.8);
+		}
+	}
+	gui.end();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
-
+	if (key == ' ') {
+		for (int i = 0; i < soundPlayerMaxSize; i++) {
+			soundPlayer[i].start();
+		}
+	}
 }
 
-//--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
-}
