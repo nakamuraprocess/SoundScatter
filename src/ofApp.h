@@ -24,4 +24,7 @@ class ofApp : public ofBaseApp{
 		SoundTrack soundTrack;
 		static const int soundPlayerMaxSize = 3;
 		SoundPlayer soundPlayer[soundPlayerMaxSize];
+		int directoryIndex;
+		vector <string> directoryNames;
+		vector <ofFile> directorys;
 };

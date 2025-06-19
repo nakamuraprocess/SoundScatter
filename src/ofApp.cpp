@@ -16,6 +16,15 @@ void ofApp::setup() {
 	color[0] = ofColor(0, 170, 0);
 	color[1] = ofColor(0, 0, 255, 100);
 	color[2] = ofColor(120, 60, 60);
+	
+	ofDirectory directory;
+	directory.listDir("sounds");
+	directory.sort();
+	for (int i = 0; i < (int)directory.size(); i++) {
+		cout << directory.getName(i) << endl;
+		directoryNames.push_back(directory.getName(i));
+		directorys.push_back(directory.getFile(i));
+	}
 
 	for (int i = 0; i < soundPlayerMaxSize; i++) {
 		soundPlayer[i].setupPlayer(soundTrack.posInit, soundTrack.radius, soundTrack.radians, soundTrack.maxSize, soundTrack.panMap, color[i]);
@@ -53,7 +62,6 @@ void ofApp::drawImGui() {
 			if (ImGui::Button(soundPlayer[i].stringButtonName.c_str(), vec2(300, 24))) {
 				soundPlayer[i].start();
 			}
-			ImGui::Separator();
 			ImGui::Combo("Tempo", &soundPlayer[i].playTempoIndex, soundPlayer[i].cTempoList, IM_ARRAYSIZE(soundPlayer[i].cTempoList));
 			ImGui::Separator();
 			ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
@@ -65,6 +73,11 @@ void ofApp::drawImGui() {
 			ImGui::SliderFloat("Pitch", &soundPlayer[i].pitch, 0.5, 2.5);
 			ImGui::Separator();
 			ImGui::SliderFloat("Volume", &soundPlayer[i].volume, 0.0, 2.8);
+			ImGui::Separator();
+			int directoryIndex = 0;
+			if (ofxImGui::VectorCombo("Directory", &directoryIndex, directoryNames)){
+				soundPlayer[i].loadSoundFilesFromDirectory(directorys[directoryIndex].getAbsolutePath());
+			}
 		}
 	}
 	gui.end();

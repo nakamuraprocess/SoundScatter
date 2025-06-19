@@ -24,8 +24,6 @@ public:
 	int rangePos = 0;
 	float volume = 1.0;
 	float pitch = 1.0;
-
-
 	string stringButtonName = buttonName[(int)bPlaying];
 
 	//--------------------------------------------------------------
@@ -41,13 +39,15 @@ public:
 		motionTimer.setMotionTransformPtr(new MoveLiner());
 		motionTimer.setMotionColorPtr(new DefaultColor());
 		motionTimer.setup(ofxMotion::DrawMode::RECT, vec2(0.0, 0.0), vec2(1.0, 1.0), 1.0, 1.0, 0.0f, color, ofxMotion::AnchorMode::ANCHOR_CENTER, 0, true);
-		loadSoundFiles("sounds1000");
+		loadSoundFilesFromDirectory("sounds/10");
 	}
 
-	void loadSoundFiles(string path) {
+	//--------------------------------------------------------------
+	void loadSoundFilesFromDirectory(string path) {
+		stop();
+		soundFiles.clear();
 		ofDirectory directory;
 		directory.listDir(path);
-		directory.allowExt("mp3");
 		directory.sort();
 		for (int i = 0; i < (int)directory.size(); i++) {
 			ofFile file(directory.getPath(i));
@@ -123,6 +123,14 @@ public:
 			startTimer();
 		}
 		else if (bPlaying) {
+			bPlaying = false;
+			stringButtonName = buttonName[(int)bPlaying];
+		}
+	}
+
+	//--------------------------------------------------------------
+	void stop() {
+		if (bPlaying) {
 			bPlaying = false;
 			stringButtonName = buttonName[(int)bPlaying];
 		}
