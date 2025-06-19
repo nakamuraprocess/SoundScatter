@@ -21,11 +21,9 @@ void ofApp::setup() {
 	directory.listDir("sounds");
 	directory.sort();
 	for (int i = 0; i < (int)directory.size(); i++) {
-		cout << directory.getName(i) << endl;
 		directoryNames.push_back(directory.getName(i));
 		directorys.push_back(directory.getFile(i));
 	}
-
 	for (int i = 0; i < soundPlayerMaxSize; i++) {
 		soundPlayer[i].setupPlayer(soundTrack.posInit, soundTrack.radius, soundTrack.radians, soundTrack.maxSize, soundTrack.panMap, color[i]);
 	}
@@ -74,9 +72,8 @@ void ofApp::drawImGui() {
 			ImGui::Separator();
 			ImGui::SliderFloat("Volume", &soundPlayer[i].volume, 0.0, 2.8);
 			ImGui::Separator();
-			int directoryIndex = 0;
-			if (ofxImGui::VectorCombo("Directory", &directoryIndex, directoryNames)){
-				soundPlayer[i].loadSoundFilesFromDirectory(directorys[directoryIndex].getAbsolutePath());
+			if (ofxImGui::VectorCombo("Directory", &soundPlayer[i].directoryIndex, directoryNames)) {
+				soundPlayer[i].loadSoundFilesFromDirectory(directorys[soundPlayer[i].directoryIndex].getAbsolutePath());
 			}
 		}
 	}

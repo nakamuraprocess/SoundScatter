@@ -18,13 +18,14 @@ private:
 public:
 	int soundFilesMaxSize = 0;
 	int playTempoIndex = 5;
-	const char* cTempoList[14] = { "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "4", "5", "10", "20", "30", "60" };
+	const char* cTempoList[16] = { "0.05", "0.1", "0.2", "0.3", "0.4", "0.5", "0.8", "1", "2", "3", "4", "5", "10", "20", "30", "60" };
 	int playThreshold = 100;
 	int range = 0;
 	int rangePos = 0;
 	float volume = 1.0;
 	float pitch = 1.0;
 	string stringButtonName = buttonName[(int)bPlaying];
+	int directoryIndex = 0;
 
 	//--------------------------------------------------------------
 	void setupPlayer(vec2 trackPosInit, vec2 trackRadius, float* trackRadians, int trackMaxSize, float* panMap, ofColor color) {
@@ -39,7 +40,6 @@ public:
 		motionTimer.setMotionTransformPtr(new MoveLiner());
 		motionTimer.setMotionColorPtr(new DefaultColor());
 		motionTimer.setup(ofxMotion::DrawMode::RECT, vec2(0.0, 0.0), vec2(1.0, 1.0), 1.0, 1.0, 0.0f, color, ofxMotion::AnchorMode::ANCHOR_CENTER, 0, true);
-		loadSoundFilesFromDirectory("sounds/10");
 	}
 
 	//--------------------------------------------------------------
@@ -62,6 +62,7 @@ public:
 				}
 			}
 		}
+		rangePos = 0;
 		soundFilesMaxSize = (int)soundFiles.size();
 		cout << "Sound File Size: " << soundFilesMaxSize << endl;
 	}
@@ -123,8 +124,7 @@ public:
 			startTimer();
 		}
 		else if (bPlaying) {
-			bPlaying = false;
-			stringButtonName = buttonName[(int)bPlaying];
+			stop();
 		}
 	}
 
@@ -132,6 +132,11 @@ public:
 	void stop() {
 		if (bPlaying) {
 			bPlaying = false;
+			for (int i = 0; i < soundFiles.size(); i++) {
+				if (soundFiles[i].isPlaying()) {
+					soundFiles[i].stop();
+				}
+			}
 			stringButtonName = buttonName[(int)bPlaying];
 		}
 	}
