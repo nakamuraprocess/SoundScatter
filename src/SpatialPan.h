@@ -14,7 +14,7 @@ public:
 
 	//--------------------------------------------------------------
 	void setup(vec2 pos, vec2 size, ofColor colorBackground, ofColor colorForeground) {
-		SpatialPanArea.set(pos.x, pos.y, size.x, size.y);
+		SpatialPanArea.set(-size.x * 0.5, -size.y * 0.5, size.x, size.y);
 		float x = pos.x + size.x * 0.5;
 		float y = pos.y + size.y * 0.5;
 		this->pos = vec2(x, y);
@@ -33,8 +33,8 @@ public:
 
 		for (int i = 0; i < spatialPanMaxSize; i++) {
 			radians[i] = (PI / spatialPanMaxSize) * i;
-			float x = (cos(radians[i]) * radius.x);
-			float y = (sin(radians[i]) * radius.y);
+			float x = cos(radians[i]) * radius.x * 0.5;
+			float y = sin(radians[i]) * radius.y * 0.5;
 			posTargets[i] = vec2(x, y);
 		}
 
@@ -43,22 +43,25 @@ public:
 
 	//--------------------------------------------------------------
 	void draw() {
+		ofPushMatrix();
+		ofTranslate(pos);
 		ofPushStyle();
 		ofSetColor(180, 180, 180);
 		ofDrawRectangle(SpatialPanArea);
 		ofSetColor(colorForeground);
-		ofDrawEllipse(pos, radius.x, radius.y);
+		ofDrawEllipse(0, 0, radius.x, radius.y);
 		ofSetColor(colorBackground);
-		ofDrawEllipse(pos, radius.x, radius.y);
+		ofDrawEllipse(0, 0, radius.x, radius.y);
 		ofNoFill();
 		ofSetColor(colorForeground);
 		for (int i = 0; i < 9; i++) {
-			ofDrawEllipse(pos, radius.x * (0.1 * i), radius.y * (0.1 * i));
+			ofDrawEllipse(0, 0, radius.x * (0.1 * i), radius.y * (0.1 * i));
 		}
 		for (int i = 0; i < spatialPanMaxSize; i++) {
-			ofDrawLine(pos, posTargets[i]);
+			ofDrawLine(0, 0, posTargets[i].x, posTargets[i].y);
 		}
 		ofPopStyle();
+		ofPopMatrix();
 	}
 
 };

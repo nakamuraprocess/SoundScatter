@@ -11,8 +11,8 @@ void ofApp::setup() {
 	guiSize = vec2(300, 200);
 
 	ofDirectory directory;
-	//directory.listDir("E:\\Sounds\\Sound Effect");
-	directory.listDir("sounds");
+	directory.listDir("E:\\Sounds\\Sound Effect");
+	//directory.listDir("sounds");
 	directory.sort();
 	for (int i = 0; i < (int)directory.size(); i++) {
 		ofFile directoryAsFile = directory.getFile(i);

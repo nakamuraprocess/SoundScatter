@@ -82,6 +82,7 @@ public:
 		ofPopStyle();
 
 		motionTimer.draw();
+		SpatialPan.draw();
 	}
 
 	//--------------------------------------------------------------
