@@ -1,45 +1,42 @@
 #pragma once
 
+#include "SpatialPan.h"
+
 class SoundPlayer {
 private:
-	ofxMotion motionPlay;
+	vec2 size;
+	SpatialPan SpatialPan;
 	ofxMotion motionTimer;
 	ofSoundPlayer* soundPlayerPtr = nullptr;;
 	vector <ofSoundPlayer> soundFiles;
-	vec2 trackPosInit;
-	int trackIndex;
-	vec2 trackRadius;
-	float* trackRadians;
-	int trackMaxSize;
-	float* panMap;
 	bool bPlaying = false;
 	string buttonName[2] = { "START", "STOP" };
+	ofRectangle timerAreaBase;
+	ofRectangle timerAreaInner;
+
 
 public:
 	int soundFilesMaxSize = 0;
-	int playTempoIndex = 5;
-	const char* cTempoList[16] = { "0.05", "0.1", "0.2", "0.3", "0.4", "0.5", "0.8", "1", "2", "3", "4", "5", "10", "20", "30", "60" };
+	int directoryIndex = 0;
+	string stringButtonName = buttonName[(int)bPlaying];
+	int playTempoIndex = 9;
+	const char* cTempoList[18] = { "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1", "2", "3", "4", "5", "10", "20", "30", "60" };
 	int playThreshold = 100;
 	int range = 0;
 	int rangePos = 0;
 	float volume = 1.0;
 	float pitch = 1.0;
-	string stringButtonName = buttonName[(int)bPlaying];
-	int directoryIndex = 0;
+
 
 	//--------------------------------------------------------------
-	void setupPlayer(vec2 trackPosInit, vec2 trackRadius, float* trackRadians, int trackMaxSize, float* panMap, ofColor color) {
-		this->trackPosInit = trackPosInit;
-		this->trackRadius = trackRadius;
-		this->trackRadians = trackRadians;
-		this->trackMaxSize = trackMaxSize;
-		this->panMap = panMap;
-		motionPlay.setMotionTransformPtr(new MoveRadial());
-		motionPlay.setMotionColorPtr(new DefaultColor());
-		motionPlay.setup(ofxMotion::DrawMode::CIRCLE, this->trackPosInit, vec2(1.0, 1.0), 12, 12, 0.0f, color, ofxMotion::AnchorMode::ANCHOR_CENTER, 0, false);
+	void setupPlayer(vec2 pos, vec2 size, int marginTop) {
+		this->size = size;
 		motionTimer.setMotionTransformPtr(new MoveLiner());
 		motionTimer.setMotionColorPtr(new DefaultColor());
-		motionTimer.setup(ofxMotion::DrawMode::RECT, vec2(0.0, 0.0), vec2(1.0, 1.0), 1.0, 1.0, 0.0f, color, ofxMotion::AnchorMode::ANCHOR_CENTER, 0, true);
+		motionTimer.setup(ofxMotion::DrawMode::RECT, pos, vec2(1.0, 1.0), 4.0, 8.0, 0.0f, ofColor(200), ofxMotion::AnchorMode::ANCHOR_TOP_LEFT, 0, false);
+		SpatialPan.setup(vec2(pos.x, size.y), vec2(size.x, size.x), ofColor(200, 200, 200), ofColor(50));
+		timerAreaBase = ofRectangle(pos.x, pos.y, size.x, marginTop);
+		timerAreaInner = ofRectangle(pos.x + 10, pos.y + 6 , size.x - 14, marginTop - 10);
 	}
 
 	//--------------------------------------------------------------
@@ -69,50 +66,46 @@ public:
 
 	//--------------------------------------------------------------
 	void update(float now) {
-		motionPlay.update(now);
 		motionTimer.update(now);
-
-		if (rangePos >= soundFilesMaxSize) {
-			rangePos = soundFilesMaxSize - 1;
-		}
-		int rangeMaxCul = rangePos + range;
-		if (rangeMaxCul > soundFilesMaxSize) {
-			rangeMaxCul = soundFilesMaxSize;
-		}
-		if (bPlaying && motionPlay.getMotionTransform()->getState() == MotionTransformBase::DONE) {
-			motionPlay.getMotionTransform()->setState(MotionTransformBase::IDLING);
-			int index = ofRandom(rangePos, rangeMaxCul);
-			soundPlayerPtr = &soundFiles[index];
-			if (soundPlayerPtr != nullptr) {
-				soundPlayerPtr->setPan(panMap[trackIndex]);
-				soundPlayerPtr->setSpeed(pitch);
-				soundPlayerPtr->setVolume(volume);
-				soundPlayerPtr->play();
-			}
-		}
 		if (bPlaying && motionTimer.getMotionTransform()->getState() == MotionTransformBase::DONE) {
 			motionTimer.getMotionTransform()->setState(MotionTransformBase::IDLING);
 			startTimer();
 		}
 	}
-
 	//--------------------------------------------------------------
 	void draw() {
-		if (bPlaying) {
-			motionPlay.draw();
-		}
+		ofPushStyle();
+		ofSetColor(100, 100, 120);
+		ofDrawRectangle(timerAreaBase);
+		ofSetColor(50, 50, 60);
+		ofDrawRectangle(timerAreaInner);
+		ofPopStyle();
+
+		motionTimer.draw();
 	}
 
 	//--------------------------------------------------------------
 	void startTimer() {
 		float velocity = ofToFloat(cTempoList[playTempoIndex]);
-		motionTimer.getMotionTransform()->startMoveLiner(vec2(0, 0), vec2(100, 0), velocity, 0.0, ofxeasing::linear::easeNone);
+		vec2 initPos = motionTimer.getMotionTransform()->getPosInitial();
+		motionTimer.getMotionTransform()->startMoveLiner(vec2(initPos.x + 10, 6), vec2(initPos.x + size.x - 10, 6), velocity, 0.0, ofxeasing::linear::easeNone);
 		if (ofRandom(0, 100) <= playThreshold) {
-			trackIndex = ofRandom(0, trackMaxSize);
-			motionPlay.getMotionTransform()->startMoveRadial(trackRadians[trackIndex], vec2(0, 0), trackRadius, velocity, 0.0, ofxeasing::linear::easeNone);
-		}
-		else {
-			motionPlay.getMotionTransform()->setPos(trackPosInit);
+			if (rangePos >= soundFilesMaxSize) {
+				rangePos = soundFilesMaxSize - 1;
+			}
+			int rangeMaxCul = rangePos + range;
+			if (rangeMaxCul > soundFilesMaxSize) {
+				rangeMaxCul = soundFilesMaxSize;
+			}
+			int index = ofRandom(rangePos, rangeMaxCul);
+			soundPlayerPtr = &soundFiles[index];
+			if (soundPlayerPtr != nullptr) {
+				int panIndex = ofRandom(0, SpatialPan.spatialPanMaxSize);
+				soundPlayerPtr->setPan(SpatialPan.panMap[panIndex]);
+				soundPlayerPtr->setSpeed(pitch);
+				soundPlayerPtr->setVolume(volume);
+				soundPlayerPtr->play();
+			}
 		}
 	}
 
@@ -132,9 +125,11 @@ public:
 	void stop() {
 		if (bPlaying) {
 			bPlaying = false;
-			for (int i = 0; i < soundFiles.size(); i++) {
-				if (soundFiles[i].isPlaying()) {
-					soundFiles[i].stop();
+			for (int i = 0; i < soundFilesMaxSize; i++) {
+				soundPlayerPtr = &soundFiles[i];
+				if (soundPlayerPtr != nullptr) {
+					soundPlayerPtr->setVolume(0.0);
+					soundPlayerPtr->stop();
 				}
 			}
 			stringButtonName = buttonName[(int)bPlaying];

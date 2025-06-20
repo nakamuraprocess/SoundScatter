@@ -4,7 +4,6 @@
 #include "ofxImGui.h"
 #include "ofxAppHelper.h"
 #include "ofxMotion.h"
-#include "SoundTrack.h"
 #include "SoundPlayer.h"
 
 class ofApp : public ofBaseApp{
@@ -17,11 +16,12 @@ class ofApp : public ofBaseApp{
 		void keyReleased(int key);
 
 		float now;
-		float step;
+		float deltaTime;
 
 		ofxImGui::Gui gui;
-		vec2 center;
-		SoundTrack soundTrack;
+		vec2 guiSize;
+		int marginTop;
+
 		static const int soundPlayerMaxSize = 3;
 		SoundPlayer soundPlayer[soundPlayerMaxSize];
 		vector <string> directoryNames;
