@@ -2,10 +2,9 @@
 
 #include "SpatialPan.h"
 
-class SoundPlayer {
+class SoundPlayer : ofThread{
 private:
 	vec2 size;
-	SpatialPan SpatialPan;
 	ofxMotion motionTimer;
 	ofSoundPlayer* soundPlayerPtr = nullptr;;
 	vector <ofSoundPlayer> soundFiles;
@@ -13,55 +12,37 @@ private:
 	string buttonName[2] = { "START", "STOP" };
 	ofRectangle timerAreaBase;
 	ofRectangle timerAreaInner;
-
+	string directoryPath;
 
 public:
+	SpatialPan spatialPan;
 	int soundFilesMaxSize = 0;
 	int directoryIndex = 0;
 	string stringButtonName = buttonName[(int)bPlaying];
-	int playTempoIndex = 9;
-	const char* cTempoList[18] = { "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1", "2", "3", "4", "5", "10", "20", "30", "60" };
+	int playTempoIndex = 10;
+	const char* cTempoList[13] = { "0.05", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1", "2", "3"};
 	int playThreshold = 100;
 	int range = 0;
 	int rangePos = 0;
 	float volume = 1.0;
 	float pitch = 1.0;
-
+	int panIndex = 3;
 
 	//--------------------------------------------------------------
 	void setupPlayer(vec2 pos, vec2 size, int marginTop) {
 		this->size = size;
+		timerAreaInner = ofRectangle(pos.x + 10, pos.y + 6, size.x - 14, marginTop - 10);
+		timerAreaBase = ofRectangle(pos.x, pos.y, size.x, marginTop);
 		motionTimer.setMotionTransformPtr(new MoveLiner());
 		motionTimer.setMotionColorPtr(new DefaultColor());
 		motionTimer.setup(ofxMotion::DrawMode::RECT, pos, vec2(1.0, 1.0), 4.0, 8.0, 0.0f, ofColor(200), ofxMotion::AnchorMode::ANCHOR_TOP_LEFT, 0, false);
-		SpatialPan.setup(vec2(pos.x, size.y), vec2(size.x, size.x), ofColor(200, 200, 200), ofColor(50));
-		timerAreaBase = ofRectangle(pos.x, pos.y, size.x, marginTop);
-		timerAreaInner = ofRectangle(pos.x + 10, pos.y + 6 , size.x - 14, marginTop - 10);
+		spatialPan.setup(vec2(pos.x, size.y), vec2(size.x, size.x), ofColor(200, 200, 200), ofColor(50));
 	}
 
 	//--------------------------------------------------------------
 	void loadSoundFilesFromDirectory(string path) {
-		stop();
-		soundFiles.clear();
-		ofDirectory directory;
-		directory.listDir(path);
-		directory.sort();
-		for (int i = 0; i < (int)directory.size(); i++) {
-			ofFile file(directory.getPath(i));
-			if (file.exists()) {
-				string fileExtension = ofToUpper(file.getExtension());
-				if (fileExtension == "MP3" || fileExtension == "WAV") {
-					ofSoundPlayer tmpSoundFile;
-					tmpSoundFile.load(directory.getPath(i));
-					tmpSoundFile.setLoop(false);
-					tmpSoundFile.setMultiPlay(true);
-					soundFiles.push_back(tmpSoundFile);
-				}
-			}
-		}
-		rangePos = 0;
-		soundFilesMaxSize = (int)soundFiles.size();
-		cout << "Sound File Size: " << soundFilesMaxSize << endl;
+		directoryPath = path;
+		startThread();
 	}
 
 	//--------------------------------------------------------------
@@ -72,17 +53,17 @@ public:
 			startTimer();
 		}
 	}
+
 	//--------------------------------------------------------------
 	void draw() {
 		ofPushStyle();
-		ofSetColor(100, 100, 120);
+		ofSetColor(117, 131, 142);
 		ofDrawRectangle(timerAreaBase);
 		ofSetColor(50, 50, 60);
 		ofDrawRectangle(timerAreaInner);
 		ofPopStyle();
-
 		motionTimer.draw();
-		SpatialPan.draw();
+		spatialPan.draw(panIndex);
 	}
 
 	//--------------------------------------------------------------
@@ -101,8 +82,7 @@ public:
 			int index = ofRandom(rangePos, rangeMaxCul);
 			soundPlayerPtr = &soundFiles[index];
 			if (soundPlayerPtr != nullptr) {
-				int panIndex = ofRandom(0, SpatialPan.spatialPanMaxSize);
-				soundPlayerPtr->setPan(SpatialPan.panMap[panIndex]);
+				soundPlayerPtr->setPan(spatialPan.getPan(panIndex));
 				soundPlayerPtr->setSpeed(pitch);
 				soundPlayerPtr->setVolume(volume);
 				soundPlayerPtr->play();
@@ -127,13 +107,41 @@ public:
 		if (bPlaying) {
 			bPlaying = false;
 			for (int i = 0; i < soundFilesMaxSize; i++) {
-				soundPlayerPtr = &soundFiles[i];
-				if (soundPlayerPtr != nullptr) {
-					soundPlayerPtr->setVolume(0.0);
-					soundPlayerPtr->stop();
-				}
+				soundFiles[i].setVolume(0.0);
+				soundFiles[i].stop();
 			}
 			stringButtonName = buttonName[(int)bPlaying];
+		}
+	}
+
+	//--------------------------------------------------------------
+	void threadedFunction() {
+		while (isThreadRunning()) {
+			if (lock()) {
+				stop();
+				soundFiles.clear();
+				ofDirectory directory;
+				directory.listDir(directoryPath);
+				directory.sort();
+				for (int i = 0; i < (int)directory.size(); i++) {
+					ofFile file(directory.getPath(i));
+					if (file.exists()) {
+						string fileExtension = ofToUpper(file.getExtension());
+						if (fileExtension == "MP3" || fileExtension == "WAV") {
+							ofSoundPlayer tmpSoundFile;
+							tmpSoundFile.load(directory.getPath(i));
+							tmpSoundFile.setLoop(false);
+							tmpSoundFile.setMultiPlay(true);
+							soundFiles.push_back(tmpSoundFile);
+						}
+					}
+				}
+				rangePos = 0;
+				soundFilesMaxSize = (int)soundFiles.size();
+				cout << "Sound File Size: " << soundFilesMaxSize << endl;
+				unlock();
+				stopThread();
+			}
 		}
 	}
 

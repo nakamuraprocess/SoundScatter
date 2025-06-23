@@ -8,11 +8,10 @@ void ofApp::setup() {
 
 	gui.setup();
 	marginTop = 18;
-	guiSize = vec2(300, 200);
+	guiSize = vec2(300, 220);
 
 	ofDirectory directory;
-	directory.listDir("E:\\Sounds\\Sound Effect");
-	//directory.listDir("sounds");
+	directory.listDir("E:\\Sounds\\Sound Effect\\SoundScatter");
 	directory.sort();
 	for (int i = 0; i < (int)directory.size(); i++) {
 		ofFile directoryAsFile = directory.getFile(i);
@@ -57,21 +56,24 @@ void ofApp::drawImGui() {
 			if (ImGui::Button(soundPlayer[i].stringButtonName.c_str(), vec2(guiSize.x, 24))) {
 				soundPlayer[i].start();
 			}
+			ImGui::Separator();
+			if (ofxImGui::VectorCombo("Directory", &soundPlayer[i].directoryIndex, directoryNames)) {
+				soundPlayer[i].loadSoundFilesFromDirectory(directorys[soundPlayer[i].directoryIndex].getAbsolutePath());
+			}
+			ImGui::Separator();
 			ImGui::Combo("Tempo", &soundPlayer[i].playTempoIndex, soundPlayer[i].cTempoList, IM_ARRAYSIZE(soundPlayer[i].cTempoList));
 			ImGui::Separator();
-			ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
+			ImGui::SliderInt("Position", &soundPlayer[i].rangePos, 0, soundPlayer[i].soundFilesMaxSize);
 			ImGui::Separator();
 			ImGui::SliderInt("Range", &soundPlayer[i].range, 0, soundPlayer[i].soundFilesMaxSize);
 			ImGui::Separator();
-			ImGui::SliderInt("Position", &soundPlayer[i].rangePos, 0, soundPlayer[i].soundFilesMaxSize);
+			ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
 			ImGui::Separator();
 			ImGui::SliderFloat("Pitch", &soundPlayer[i].pitch, 0.5, 2.5);
 			ImGui::Separator();
 			ImGui::SliderFloat("Volume", &soundPlayer[i].volume, 0.0, 2.8);
 			ImGui::Separator();
-			if (ofxImGui::VectorCombo("Directory", &soundPlayer[i].directoryIndex, directoryNames)) {
-				soundPlayer[i].loadSoundFilesFromDirectory(directorys[soundPlayer[i].directoryIndex].getAbsolutePath());
-			}
+			ImGui::Combo("Pan", &soundPlayer[i].panIndex, soundPlayer[i].spatialPan.cPanList, IM_ARRAYSIZE(soundPlayer[i].spatialPan.cPanList));
 		}
 	}
 	gui.end();
