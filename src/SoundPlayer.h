@@ -19,14 +19,14 @@ public:
 	int soundFilesMaxSize = 0;
 	int directoryIndex = 0;
 	string stringButtonName = buttonName[(int)bPlaying];
-	int playTempoIndex = 10;
-	const char* cTempoList[13] = { "0.05", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1", "2", "3"};
-	int playThreshold = 100;
-	int range = 0;
+	int playTempoIndex = 1;
+	const char* cTempoList[8] = { "0.08", "0.1", "0.2", "0.5", "1.0", "1.5", "2.0", "5.0" };
+	int playThreshold = 50;
+	int range = 10;
 	int rangePos = 0;
-	float volume = 1.0;
+	float volume = 0.0;
 	float pitch = 1.0;
-	int panIndex = 3;
+	int panIndex = 0;
 
 	//--------------------------------------------------------------
 	void setupPlayer(vec2 pos, vec2 size, int marginTop) {

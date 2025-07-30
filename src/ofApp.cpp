@@ -8,10 +8,10 @@ void ofApp::setup() {
 
 	gui.setup();
 	marginTop = 18;
-	guiSize = vec2(300, 220);
+	guiSize = vec2(1080/3, 220);
 
 	ofDirectory directory;
-	directory.listDir("E:\\Sounds\\Sound Effect\\SoundScatter");
+	directory.listDir("E:\\Sounds\\Sound Effect\\__SoundScatter__");
 	directory.sort();
 	for (int i = 0; i < (int)directory.size(); i++) {
 		ofFile directoryAsFile = directory.getFile(i);
@@ -65,7 +65,7 @@ void ofApp::drawImGui() {
 			ImGui::Separator();
 			ImGui::SliderInt("Position", &soundPlayer[i].rangePos, 0, soundPlayer[i].soundFilesMaxSize);
 			ImGui::Separator();
-			ImGui::SliderInt("Range", &soundPlayer[i].range, 0, soundPlayer[i].soundFilesMaxSize);
+			ImGui::SliderInt("Range", &soundPlayer[i].range, 0, 10);
 			ImGui::Separator();
 			ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
 			ImGui::Separator();
