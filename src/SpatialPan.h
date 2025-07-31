@@ -6,7 +6,7 @@ private:
 	ofColor colorBackground;
 	ofColor colorForeground;
 	vec2 radius;
-	vec2 pos;
+	vec2 size;
 	static const int spatialPanMaxSize = 9;
 	float radians[spatialPanMaxSize];
 	vec2 posTargets[spatialPanMaxSize];
@@ -16,15 +16,12 @@ public:
 	const char* cPanList[9];
 
 	//--------------------------------------------------------------
-	void setup(vec2 pos, vec2 size, ofColor colorBackground, ofColor colorForeground) {
-		float x = pos.x + (size.x * 0.5);
-		float y = pos.y + (size.y * 0.5) + 18;
-		this->pos = vec2(x, y);
-
+	void setup(vec2 size, ofColor colorBackground, ofColor colorForeground) {
+		this->size = size;
 		this->colorBackground = colorBackground;
 		this->colorForeground = colorForeground;
 		SpatialPanArea.set(-size.x * 0.5, -size.y * 0.5, size.x, size.y);
-		radius = vec2(size.x * 0.8, -size.x * 0.8);
+		radius = vec2(size.x * 0.9, -size.x * 0.9);
 		
 		panMap[0] = 0.0;
 		panMap[1] = 0.0;
@@ -45,7 +42,6 @@ public:
 		cPanList[6] = "L3";
 		cPanList[7] = "L2";
 		cPanList[8] = "L1";
-
 
 		for (int i = 0; i < 7; i++) {
 			radians[i] = (PI / 7) * i + (PI / 7) * 0.5;
@@ -76,10 +72,11 @@ public:
 	//--------------------------------------------------------------
 	void draw(int index) const {
 		ofPushMatrix();
-		ofTranslate(pos);
+		ofTranslate(size.x * 0.5, size.y * 0.5);
 		ofPushStyle();
-		ofSetColor(117, 131, 142);
+		ofSetColor(54, 60, 73);
 		ofDrawRectangle(SpatialPanArea);
+		ofTranslate(0, size.y * 0.475);
 		ofSetColor(colorForeground);
 		ofDrawEllipse(0, 0, radius.x, radius.y);
 		ofSetColor(colorBackground);

@@ -20,10 +20,12 @@ class ofApp : public ofBaseApp{
 
 		ofxImGui::Gui gui;
 		vec2 guiSize;
+		vec2 panSize;
 		int marginTop;
 
 		static const int soundPlayerMaxSize = 3;
 		SoundPlayer soundPlayer[soundPlayerMaxSize];
+		GLuint pixelSoundPlayerID[soundPlayerMaxSize];
 		vector <string> directoryNames;
 		vector <ofFile> directorys;
 };
