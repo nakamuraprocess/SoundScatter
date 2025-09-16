@@ -12,7 +12,6 @@ class ofApp : public ofBaseApp{
 		void setup();
 		void update();
 		void draw();
-		void drawImGui();
 		void keyReleased(int key);
 
 		float now;

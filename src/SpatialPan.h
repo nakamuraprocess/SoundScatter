@@ -7,13 +7,13 @@ private:
 	ofColor colorForeground;
 	vec2 radius;
 	vec2 size;
-	static const int spatialPanMaxSize = 9;
+	static const int spatialPanMaxSize = 10;
 	float radians[spatialPanMaxSize];
 	vec2 posTargets[spatialPanMaxSize];
 	float panMap[spatialPanMaxSize];
 
 public:
-	const char* cPanList[9];
+	const char* cPanList[spatialPanMaxSize];
 
 	//--------------------------------------------------------------
 	void setup(vec2 size, ofColor colorBackground, ofColor colorForeground) {
@@ -26,22 +26,24 @@ public:
 		panMap[0] = 0.0;
 		panMap[1] = 0.0;
 		panMap[2] = 0.0;
-		panMap[3] = 1.0;
-		panMap[4] = 0.8;
-		panMap[5] = 0.4;
-		panMap[6] = -0.4;
-		panMap[7] = -0.8;
-		panMap[8] = -1.0;
+		panMap[3] = -1.0;
+		panMap[4] = -0.8;
+		panMap[5] = -0.4;
+		panMap[6] = 0.0;
+		panMap[7] = 0.4;
+		panMap[8] = 0.8;
+		panMap[9] = 1.0;
 
-		cPanList[0] = "RANDOM";
-		cPanList[1] = "RANDOM LR";
-		cPanList[2] = "CENTER";
-		cPanList[3] = "R1";
-		cPanList[4] = "R2";
-		cPanList[5] = "R3";
-		cPanList[6] = "L3";
-		cPanList[7] = "L2";
-		cPanList[8] = "L1";
+		cPanList[0] = "L123CR123";
+		cPanList[1] = "L1R1";
+		cPanList[2] = "L3CR3";
+		cPanList[3] = "L1";
+		cPanList[4] = "L2";
+		cPanList[5] = "L3";
+		cPanList[6] = "C";
+		cPanList[7] = "R3";
+		cPanList[8] = "R2";
+		cPanList[9] = "R1";
 
 		for (int i = 0; i < 7; i++) {
 			radians[i] = (PI / 7) * i + (PI / 7) * 0.5;
@@ -56,12 +58,16 @@ public:
 	//--------------------------------------------------------------
 	float getPan(int index) const {
 		float pan = 0.0f;
-		if (cPanList[index] == "RANDOM") {
-			int randomIndex = ofRandom(0, spatialPanMaxSize);
+		if (cPanList[index] == "L123CR123") {
+			int randomIndex = (int)ofRandom(0, spatialPanMaxSize);
 			pan = panMap[randomIndex];
 		}
-		else if (cPanList[index] == "RANDOM LR") {
+		else if (cPanList[index] == "L1R1") {
 			pan = ofSign(ofRandomf());
+		}
+		else if (cPanList[index] == "L3CR3") {
+			int randomIndex = (int)ofRandom(5.0, 8.0);
+			pan = panMap[randomIndex];
 		}
 		else {
 			pan = panMap[index];
@@ -76,7 +82,7 @@ public:
 		ofPushStyle();
 		ofSetColor(54, 60, 73);
 		ofDrawRectangle(SpatialPanArea);
-		ofTranslate(0, size.y * 0.475);
+		ofTranslate(0, size.y * 0.47);
 		ofSetColor(colorForeground);
 		ofDrawEllipse(0, 0, radius.x, radius.y);
 		ofSetColor(colorBackground);
@@ -86,17 +92,19 @@ public:
 		for (int i = 0; i < 9; i++) {
 			ofDrawEllipse(0, 0, radius.x * (0.1 * i), radius.y * (0.1 * i));
 		}
-		if (cPanList[index] == "RANDOM") {
+		if (cPanList[index] == "L123CR123") {
 			for (int i = 0; i < spatialPanMaxSize; i++) {
 				ofDrawLine(0, 0, posTargets[i].x, posTargets[i].y);
 			}
 		}
-		else if (cPanList[index] == "RANDOM LR") {
+		else if (cPanList[index] == "L1R1") {
 			ofDrawLine(0, 0, posTargets[0].x, posTargets[0].y);
 			ofDrawLine(0, 0, posTargets[6].x, posTargets[6].y);
 		}
-		else if (cPanList[index] == "CENTER") {
+		else if (cPanList[index] == "L3CR3") {
+			ofDrawLine(0, 0, posTargets[2].x, posTargets[2].y);
 			ofDrawLine(0, 0, posTargets[3].x, posTargets[3].y);
+			ofDrawLine(0, 0, posTargets[4].x, posTargets[4].y);
 		}
 		else if (cPanList[index] == "R1") {
 			ofDrawLine(0, 0, posTargets[0].x, posTargets[0].y);
@@ -106,6 +114,9 @@ public:
 		}
 		else if (cPanList[index] == "R3") {
 			ofDrawLine(0, 0, posTargets[2].x, posTargets[2].y);
+		}
+		else if (cPanList[index] == "C") {
+			ofDrawLine(0, 0, posTargets[3].x, posTargets[3].y);
 		}
 		else if (cPanList[index] == "L3") {
 			ofDrawLine(0, 0, posTargets[4].x, posTargets[4].y);

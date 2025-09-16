@@ -7,7 +7,7 @@ void ofApp::setup() {
 	deltaTime = 1.0f / 60;
 
 	gui.setup();
-	guiSize = vec2(1080 / 3, 620);
+	guiSize = vec2(1080 / 3, 400);
 	panSize = vec2(guiSize.x - 126, 116);
 
 	ofDirectory directory;
@@ -22,26 +22,19 @@ void ofApp::setup() {
 	}
 	for (int i = 0; i < soundPlayerMaxSize; i++) {
 		soundPlayer[i].setupPlayer(panSize);
+		soundPlayer[i].drawFbo();
+		pixelSoundPlayerID[i] = gui.loadPixels(soundPlayer[i].pixelsSpatiolPan);
 	}
 	ofBackground(200);
 }
 
 //--------------------------------------------------------------
 void ofApp::update() {
-	now += deltaTime;
+	//now += deltaTime;
 }
 
 //--------------------------------------------------------------
 void ofApp::draw(){
-	for (int i = 0; i < soundPlayerMaxSize; i++) {
-		soundPlayer[i].draw();
-		pixelSoundPlayerID[i] = gui.loadPixels(soundPlayer[i].pixelsSpatiolPan);
-	}
-	drawImGui();
-}
-
-//--------------------------------------------------------------
-void ofApp::drawImGui() {
 	gui.begin();
 	for (int i = 0; i < soundPlayerMaxSize; i++) {
 		ImGui::GetStyle().WindowRounding = 0;
@@ -58,19 +51,28 @@ void ofApp::drawImGui() {
 			soundPlayer[i].loadSoundFilesFromDirectory(directorys[soundPlayer[i].directoryIndex].getAbsolutePath());
 		}
 		ImGui::Separator();
-		ImGui::Combo("Interval", &soundPlayer[i].playTempoIndex, soundPlayer[i].cIntervalList, IM_ARRAYSIZE(soundPlayer[i].cIntervalList));
+		ImGui::Combo("Interval", &soundPlayer[i].intervalIndex, soundPlayer[i].cIntervalList, IM_ARRAYSIZE(soundPlayer[i].cIntervalList));
+		ImGui::Separator();
+		if (ImGui::Combo("Group", &soundPlayer[i].groupIndex, soundPlayer[i].cGroupList, IM_ARRAYSIZE(soundPlayer[i].cGroupList))) {
+			soundPlayer[i].groupIndexCounter = 0;
+		}
+		ImGui::Separator();
+		ImGui::Combo("Wait Time", &soundPlayer[i].waitTimeIndex, soundPlayer[i].cWaitTimeList, IM_ARRAYSIZE(soundPlayer[i].cWaitTimeList));
 		ImGui::Separator();
 		ImGui::SliderInt("Position", &soundPlayer[i].rangePos, 0, soundPlayer[i].soundFilesMaxSize);
 		ImGui::Separator();
-		ImGui::SliderInt("Range", &soundPlayer[i].range, 0, 10);
+		ImGui::SliderInt("Range", &soundPlayer[i].range, 1, 10);
 		ImGui::Separator();
-		ImGui::SliderInt("Threshold", &soundPlayer[i].playThreshold, 0, 100);
+		ImGui::SliderFloat("Threshold", &soundPlayer[i].threshold, 0.0f, 1.0f);
 		ImGui::Separator();
 		ImGui::SliderFloat("Pitch", &soundPlayer[i].pitch, 0.5, 2.5);
 		ImGui::Separator();
 		ImGui::SliderFloat("Volume", &soundPlayer[i].volume, 0.0, 2.8);
 		ImGui::Separator();
-		ImGui::Combo("Pan", &soundPlayer[i].panIndex, soundPlayer[i].spatialPan.cPanList, IM_ARRAYSIZE(soundPlayer[i].spatialPan.cPanList));
+		if (ImGui::Combo("Pan", &soundPlayer[i].panIndex, soundPlayer[i].spatialPan.cPanList, IM_ARRAYSIZE(soundPlayer[i].spatialPan.cPanList))) {
+			soundPlayer[i].drawFbo();
+			pixelSoundPlayerID[i] = gui.loadPixels(soundPlayer[i].pixelsSpatiolPan);
+		}
 		ImGui::Separator();
 		ImGui::Image(GetImTextureID(pixelSoundPlayerID[i]), ImVec2(panSize));
 	}

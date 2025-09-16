@@ -18,10 +18,17 @@ public:
 	int soundFilesMaxSize = 0;
 	int directoryIndex = 0;
 	string stringButtonName = buttonName[(int)bPlaying];
-	int playTempoIndex = 0;
-	const char* cIntervalList[13] = { "100", "110", "120", "130", "140", "150", "200", "300", "400", "500", "1500", "1000", "2000" };
-	int playThreshold = 50;
-	int range = 10;
+
+	int intervalIndex = 4;
+	const char* cIntervalList[20] = { "60", "70", "80", "90", "100", "110", "120", "130", "140", "150", "160", "170", "180", "190", "200", "300", "400", "500", "1000", "2000"};
+	int groupIndex = 0;
+	int groupIndexCounter = 0;
+	const char* cGroupList[5] = { "1", "2", "3", "4", "8" };
+	int waitTimeIndex = 0;
+	const char* cWaitTimeList[7] = { "500", "1000", "1500", "2000", "2500", "3000", "5000" };
+
+	float threshold = 1.0;
+	int range = 1;
 	int rangePos = 0;
 	float volume = 0.0;
 	float pitch = 1.0;
@@ -62,7 +69,7 @@ public:
 	}
 
 	//--------------------------------------------------------------
-	void draw() {
+	void drawFbo() {
 		fboSpatiolPan.begin();
 		ofClear(255);
 		spatialPan.draw(panIndex);
@@ -87,9 +94,8 @@ public:
 		if (bPlaying) {
 			stopThread();
 			bPlaying = false;
-			for (int i = 0; i < soundFilesMaxSize; i++) {
-				soundFiles[i].setVolume(0.0);
-				soundFiles[i].stop();
+			if (soundPlayerPtr != nullptr) {
+				soundPlayerPtr->stop();
 			}
 			stringButtonName = buttonName[(int)bPlaying];
 		}
@@ -99,7 +105,7 @@ public:
 	void threadedFunction() {
 		while (isThreadRunning()) {
 			if (lock()) {
-				if (ofRandom(0, 100) <= playThreshold) {
+				if (ofRandom(1.0) <= threshold) {
 					if (rangePos >= soundFilesMaxSize) {
 						rangePos = soundFilesMaxSize - 1;
 					}
@@ -116,7 +122,14 @@ public:
 						soundPlayerPtr->play();
 					}
 				}
-				sleep(ofToInt(cIntervalList[playTempoIndex]));
+
+				groupIndexCounter++;
+				groupIndexCounter %= ofToInt(cGroupList[groupIndex]);
+				int interval = ofToInt(cIntervalList[intervalIndex]);
+				if (cGroupList[groupIndex] != "1" && groupIndexCounter == ofToInt(cGroupList[groupIndex]) - 1) {
+					interval = ofToInt(cWaitTimeList[waitTimeIndex]);
+				}
+				sleep(interval);
 				unlock();
 			}
 		}
